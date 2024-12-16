@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Users, Truck, Building2, Tool, Calendar, UserCog } from "lucide-react";
+import { Search, Users, Truck, Building2, Wrench, Calendar, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
@@ -10,7 +10,7 @@ const Index = () => {
     { title: "Operarios", icon: Users, route: "/operarios" },
     { title: "Equipos", icon: Truck, route: "/equipos" },
     { title: "Marcas", icon: Building2, route: "/marcas" },
-    { title: "Mantenimiento", icon: Tool, route: "/mantenimiento" },
+    { title: "Mantenimiento", icon: Wrench, route: "/mantenimiento" },
     { title: "Calendario", icon: Calendar, route: "/calendario" },
     { title: "Editar Perfil", icon: UserCog, route: "/perfil" },
   ];
