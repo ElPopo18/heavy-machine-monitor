@@ -16,7 +16,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Search Bar */}
       <div className="w-full max-w-4xl mx-auto p-4">
         <div className="relative">
@@ -29,18 +29,20 @@ const Index = () => {
       </div>
 
       {/* Menu Grid */}
-      <div className="max-w-4xl mx-auto p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {menuOptions.map((option) => (
-          <Button
-            key={option.title}
-            variant="outline"
-            className="h-32 flex flex-col items-center justify-center gap-2 hover:bg-accent"
-            onClick={() => navigate(option.route)}
-          >
-            <option.icon className="h-8 w-8" />
-            <span className="text-lg font-medium">{option.title}</span>
-          </Button>
-        ))}
+      <div className="flex-1 flex items-center justify-center px-4 pb-4">
+        <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {menuOptions.map((option) => (
+            <Button
+              key={option.title}
+              variant="outline"
+              className="h-32 flex flex-col items-center justify-center gap-2 hover:bg-accent"
+              onClick={() => navigate(option.route)}
+            >
+              <option.icon className="h-8 w-8" />
+              <span className="text-lg font-medium">{option.title}</span>
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   );
