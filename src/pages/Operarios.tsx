@@ -1,176 +1,126 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Trash, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+interface Operator {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  photo_url: string | null;
+}
 
 const Operarios = () => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    cedula: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    email: "",
-    photo: null as File | null,
-  });
+  const navigate = useNavigate();
+  const [operators, setOperators] = useState<Operator[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [errors, setErrors] = useState({
-    cedula: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-  });
+  const fetchOperators = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('operators')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  const validateForm = () => {
-    const newErrors = {
-      cedula: formData.cedula ? "" : "Complete este campo por favor",
-      firstName: formData.firstName ? "" : "Complete este campo por favor",
-      lastName: formData.lastName ? "" : "Complete este campo por favor",
-      phone: formData.phone ? "" : "Complete este campo por favor",
-    };
-
-    setErrors(newErrors);
-    return !Object.values(newErrors).some((error) => error !== "");
+      if (error) throw error;
+      setOperators(data || []);
+    } catch (error) {
+      console.error('Error fetching operators:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudieron cargar los operarios",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+  const handleDelete = async (id: string) => {
     try {
-      let photoUrl = null;
-      if (formData.photo) {
-        const fileExt = formData.photo.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from('operators-photos')
-          .upload(fileName, formData.photo);
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('operators-photos')
-          .getPublicUrl(fileName);
-        
-        photoUrl = publicUrl;
-      }
-
-      const { error } = await supabase.from('operators').insert({
-        cedula: formData.cedula,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.phone,
-        email: formData.email || null,
-        photo_url: photoUrl,
-      });
+      const { error } = await supabase
+        .from('operators')
+        .delete()
+        .eq('id', id);
 
       if (error) throw error;
 
       toast({
-        title: "Operario registrado exitosamente",
-        description: "Los datos han sido guardados en la base de datos",
+        title: "Operario eliminado",
+        description: "El operario ha sido eliminado exitosamente",
       });
 
-      // Reset form
-      setFormData({
-        cedula: "",
-        firstName: "",
-        lastName: "",
-        phone: "",
-        email: "",
-        photo: null,
-      });
+      setOperators(operators.filter(op => op.id !== id));
     } catch (error) {
+      console.error('Error deleting operator:', error);
       toast({
         variant: "destructive",
-        title: "Error al registrar operario",
-        description: "Hubo un problema al guardar los datos. Por favor intente nuevamente.",
+        title: "Error",
+        description: "No se pudo eliminar el operario",
       });
-      console.error('Error:', error);
     }
   };
 
+  useEffect(() => {
+    fetchOperators();
+  }, []);
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Cargando...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Registro de Operarios</h1>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="cedula">Cédula</Label>
-            <Input
-              id="cedula"
-              value={formData.cedula}
-              onChange={(e) => setFormData(prev => ({ ...prev, cedula: e.target.value }))}
-              className={errors.cedula ? "border-red-500" : ""}
-            />
-            {errors.cedula && <p className="text-red-500 text-sm">{errors.cedula}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="firstName">Nombre</Label>
-            <Input
-              id="firstName"
-              value={formData.firstName}
-              onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-              className={errors.firstName ? "border-red-500" : ""}
-            />
-            {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Apellido</Label>
-            <Input
-              id="lastName"
-              value={formData.lastName}
-              onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-              className={errors.lastName ? "border-red-500" : ""}
-            />
-            {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input
-              id="phone"
-              value={formData.phone}
-              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              className={errors.phone ? "border-red-500" : ""}
-            />
-            {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email (Opcional)</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="photo">Foto (Opcional)</Label>
-            <Input
-              id="photo"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFormData(prev => ({ ...prev, photo: e.target.files?.[0] || null }))}
-            />
-          </div>
-
-          <Button type="submit" className="w-full">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Lista de Operarios</h1>
+          <Button onClick={() => navigate('/operarios/registro')} className="gap-2">
+            <PlusCircle className="h-5 w-5" />
             Registrar Operario
           </Button>
-        </form>
+        </div>
+
+        {operators.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No hay operarios registrados
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {operators.map((operator) => (
+              <Card key={operator.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={operator.photo_url || undefined} alt={`${operator.first_name} ${operator.last_name}`} />
+                      <AvatarFallback>{operator.first_name[0]}{operator.last_name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{operator.first_name} {operator.last_name}</h3>
+                      <p className="text-sm text-muted-foreground">{operator.phone}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(operator.id)}
+                      className="text-destructive hover:text-destructive/90"
+                    >
+                      <Trash className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

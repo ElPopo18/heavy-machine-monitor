@@ -7,6 +7,7 @@ import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Operarios from "./pages/Operarios";
+import OperariosRegistro from "./pages/OperariosRegistro";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Operarios />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/operarios/registro"
+              element={
+                <ProtectedRoute>
+                  <OperariosRegistro />
                 </ProtectedRoute>
               }
             />
