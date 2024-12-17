@@ -13,7 +13,7 @@ const OperariosRegistro = () => {
     cedula: "",
     firstName: "",
     lastName: "",
-    phone: "",
+    phone: "", // Keep this field, but now optional
     email: "",
     photo: null as File | null,
   });
@@ -22,7 +22,7 @@ const OperariosRegistro = () => {
     cedula: "",
     firstName: "",
     lastName: "",
-    phone: "",
+    phone: "", // Keep phone error state, but will be optional
   });
 
   const validateForm = () => {
@@ -48,8 +48,8 @@ const OperariosRegistro = () => {
       newErrors.lastName = "El apellido debe contener solo letras y tener al menos 2 caracteres";
     }
 
-    // Validación de teléfono (formato XXXX-XXXXXXX)
-    if (!/^\d{4}-\d{7}$/.test(formData.phone)) {
+    // Validación de teléfono (opcional, pero si se ingresa debe cumplir formato)
+    if (formData.phone && !/^\d{4}-\d{7}$/.test(formData.phone)) {
       newErrors.phone = "El teléfono debe tener el formato XXXX-XXXXXXX";
     }
 
@@ -74,7 +74,7 @@ const OperariosRegistro = () => {
       if (formData.photo) {
         const fileExt = formData.photo.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('operators-photos')
           .upload(fileName, formData.photo);
 
@@ -91,7 +91,7 @@ const OperariosRegistro = () => {
         cedula: formData.cedula,
         first_name: formData.firstName,
         last_name: formData.lastName,
-        phone: formData.phone,
+        phone: formData.phone || null, // Allow null for phone
         email: formData.email || null,
         photo_url: photoUrl,
       });
@@ -181,13 +181,13 @@ const OperariosRegistro = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Teléfono *</Label>
+            <Label htmlFor="phone">Teléfono</Label>
             <Input
               id="phone"
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              placeholder="XXXX-XXXXXXX"
+              placeholder="XXXX-XXXXXXX (Opcional)"
               className={errors.phone ? "border-red-500" : ""}
             />
             {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
