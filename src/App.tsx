@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Operarios from "./pages/Operarios";
 import OperariosRegistro from "./pages/OperariosRegistro";
+import Equipos from "./pages/Equipos";
+import EquiposRegistro from "./pages/EquiposRegistro";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
@@ -53,6 +55,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <OperariosRegistro />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/equipos"
+              element={
+                <ProtectedRoute>
+                  <Equipos />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/equipos/registro"
+              element={
+                <ProtectedRoute>
+                  <EquiposRegistro />
                 </ProtectedRoute>
               }
             />
