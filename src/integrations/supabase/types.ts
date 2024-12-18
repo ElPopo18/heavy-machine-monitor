@@ -9,6 +9,62 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      brands: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      equipment: {
+        Row: {
+          brand_id: string
+          code: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          photo_url: string | null
+        }
+        Insert: {
+          brand_id: string
+          code: string
+          created_at?: string
+          description: string
+          id?: string
+          name: string
+          photo_url?: string | null
+        }
+        Update: {
+          brand_id?: string
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operators: {
         Row: {
           cedula: string
