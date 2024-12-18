@@ -1,84 +1,33 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Operarios from "./pages/Operarios";
-import OperariosRegistro from "./pages/OperariosRegistro";
-import Equipos from "./pages/Equipos";
-import EquiposRegistro from "./pages/EquiposRegistro";
-import { supabase } from "./integrations/supabase/client";
+import Index from "@/pages/Index";
+import Equipos from "@/pages/Equipos";
+import EquiposRegistro from "@/pages/EquiposRegistro";
+import Operarios from "@/pages/Operarios";
+import OperariosRegistro from "@/pages/OperariosRegistro";
+import Marcas from "@/pages/Marcas";
+import MarcasRegistro from "@/pages/MarcasRegistro";
 
 const queryClient = new QueryClient();
 
-// Protected Route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const session = supabase.auth.getSession();
-
-  if (!session) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return <>{children}</>;
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SessionContextProvider supabaseClient={supabase}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/operarios"
-              element={
-                <ProtectedRoute>
-                  <Operarios />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/operarios/registro"
-              element={
-                <ProtectedRoute>
-                  <OperariosRegistro />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/equipos"
-              element={
-                <ProtectedRoute>
-                  <Equipos />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/equipos/registro"
-              element={
-                <ProtectedRoute>
-                  <EquiposRegistro />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </SessionContextProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/equipos" element={<Equipos />} />
+          <Route path="/equipos/registro" element={<EquiposRegistro />} />
+          <Route path="/operarios" element={<Operarios />} />
+          <Route path="/operarios/registro" element={<OperariosRegistro />} />
+          <Route path="/marcas" element={<Marcas />} />
+          <Route path="/marcas/registro" element={<MarcasRegistro />} />
+        </Routes>
+      </Router>
+      <Toaster />
+    </QueryClientProvider>
+  );
+}
 
 export default App;
