@@ -1,8 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
 import Equipos from "@/pages/Equipos";
 import EquiposRegistro from "@/pages/EquiposRegistro";
 import Operarios from "@/pages/Operarios";
@@ -17,7 +16,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
           <Route path="/equipos" element={<Equipos />} />
           <Route path="/equipos/registro" element={<EquiposRegistro />} />
           <Route path="/operarios" element={<Operarios />} />

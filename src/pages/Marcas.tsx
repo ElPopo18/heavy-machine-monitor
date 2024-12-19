@@ -63,7 +63,9 @@ const Marcas = () => {
         title: "Marca registrada",
         description: "La marca ha sido registrada exitosamente",
       });
-      navigate("/");
+      
+      // Use window.location for a full page refresh to ensure proper navigation
+      window.location.href = "/";
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -115,7 +117,7 @@ const Marcas = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/")}
+              onClick={() => window.location.href = "/"}
               className="flex-1"
             >
               Cancelar
