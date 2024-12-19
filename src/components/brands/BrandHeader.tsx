@@ -7,11 +7,7 @@ export const BrandHeader = () => {
 
   return (
     <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-bold">Marcas</h1>
-      <Button onClick={() => navigate("/marcas/registro")}>
-        <Plus className="h-4 w-4 mr-2" />
-        Registrar Marca
-      </Button>
+      <h1 className="text-2xl font-bold">Registro de Marcas</h1>
     </div>
   );
 };
