@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import Index from "@/pages/Index";
 import Equipos from "@/pages/Equipos";
 import Operarios from "@/pages/Operarios";
