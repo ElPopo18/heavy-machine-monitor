@@ -63,7 +63,7 @@ const MarcasRegistro = () => {
         title: "Marca registrada",
         description: "La marca ha sido registrada exitosamente",
       });
-      navigate("/marcas");
+      navigate("/");
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -115,7 +115,7 @@ const MarcasRegistro = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/marcas")}
+              onClick={() => navigate("/")}
               className="flex-1"
             >
               Cancelar
