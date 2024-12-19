@@ -17,6 +17,9 @@ const Index = () => {
         <Button onClick={() => navigate("/marcas")} className="h-32">
           Gestión de Marcas
         </Button>
+        <Button onClick={() => navigate("/mantenimiento/registro")} className="h-32">
+          Mantenimiento
+        </Button>
       </div>
     </div>
   );

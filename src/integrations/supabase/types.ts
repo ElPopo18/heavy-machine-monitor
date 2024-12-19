@@ -68,6 +68,48 @@ export type Database = {
           },
         ]
       }
+      maintenance: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          id: string
+          observations: string | null
+          operator_id: string
+          scheduled_date: string
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          id?: string
+          observations?: string | null
+          operator_id: string
+          scheduled_date: string
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          id?: string
+          observations?: string | null
+          operator_id?: string
+          scheduled_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operators: {
         Row: {
           cedula: string
