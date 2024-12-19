@@ -8,7 +8,6 @@ import EquiposRegistro from "@/pages/EquiposRegistro";
 import Operarios from "@/pages/Operarios";
 import OperariosRegistro from "@/pages/OperariosRegistro";
 import Marcas from "@/pages/Marcas";
-import MarcasRegistro from "@/pages/MarcasRegistro";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +23,6 @@ function App() {
           <Route path="/operarios" element={<Operarios />} />
           <Route path="/operarios/registro" element={<OperariosRegistro />} />
           <Route path="/marcas" element={<Marcas />} />
-          <Route path="/marcas/registro" element={<MarcasRegistro />} />
         </Routes>
       </Router>
       <Toaster />
