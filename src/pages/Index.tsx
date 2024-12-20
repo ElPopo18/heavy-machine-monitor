@@ -18,8 +18,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Logout button at the top */}
-      <div className="w-full p-4 flex justify-end">
+      {/* Header with logout button */}
+      <div className="w-full p-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Sistema de Gestión</h1>
         <Button 
           variant="outline" 
           onClick={handleLogout}
@@ -31,7 +32,6 @@ const Index = () => {
 
       {/* Main content centered */}
       <div className="flex-1 container mx-auto p-4 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-8">Sistema de Gestión</h1>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-4xl w-full">
           <Button onClick={() => navigate("/equipos")} className="h-32">
             Gestión de Equipos
