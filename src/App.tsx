@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "@/pages/Index";
 import Equipos from "@/pages/Equipos";
 import EquiposRegistro from "@/pages/EquiposRegistro";
@@ -7,6 +7,7 @@ import Operarios from "@/pages/Operarios";
 import OperariosRegistro from "@/pages/OperariosRegistro";
 import Marcas from "@/pages/Marcas";
 import MantenimientoRegistro from "@/pages/MantenimientoRegistro";
+import MantenimientoCalendario from "@/pages/MantenimientoCalendario";
 import Auth from "@/pages/Auth";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/operarios/registro" element={<OperariosRegistro />} />
         <Route path="/marcas" element={<Marcas />} />
         <Route path="/mantenimiento/registro" element={<MantenimientoRegistro />} />
+        <Route path="/mantenimiento/calendario" element={<MantenimientoCalendario />} />
         <Route path="/auth" element={<Auth />} />
       </Routes>
       <Toaster />
