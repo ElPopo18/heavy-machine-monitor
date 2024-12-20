@@ -20,6 +20,9 @@ const Index = () => {
         <Button onClick={() => navigate("/mantenimiento/registro")} className="h-32">
           Mantenimiento
         </Button>
+        <Button onClick={() => navigate("/auth")} className="h-32">
+          Iniciar Sesión / Registrarse
+        </Button>
       </div>
     </div>
   );
