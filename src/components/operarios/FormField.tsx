@@ -10,6 +10,7 @@ interface FormFieldProps {
   type?: string;
   placeholder?: string;
   required?: boolean;
+  accept?: string;  // Added this line to resolve the TypeScript error
 }
 
 export const FormField = ({
@@ -20,7 +21,8 @@ export const FormField = ({
   error,
   type = "text",
   placeholder,
-  required = false
+  required = false,
+  accept,  // Added this parameter
 }: FormFieldProps) => {
   return (
     <div className="space-y-2">
@@ -32,6 +34,7 @@ export const FormField = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        accept={accept}  // Added this prop to pass through to the input
         className={error ? "border-red-500" : ""}
       />
       {error && <p className="text-red-500 text-sm">{error}</p>}
