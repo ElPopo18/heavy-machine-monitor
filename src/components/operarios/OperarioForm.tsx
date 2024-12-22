@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { FormField } from "./FormField";
+import { validateOperarioForm, FormErrors } from "./utils/validation";
 
 interface FormData {
   cedula: string;
@@ -13,13 +13,6 @@ interface FormData {
   phone: string;
   email: string;
   photo: File | null;
-}
-
-interface FormErrors {
-  cedula: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
 }
 
 export const OperarioForm = () => {
@@ -41,38 +34,13 @@ export const OperarioForm = () => {
     phone: "",
   });
 
-  const validateForm = () => {
-    const newErrors = {
-      cedula: "",
-      firstName: "",
-      lastName: "",
-      phone: "",
-    };
-
-    if (!/^\d{7,8}$/.test(formData.cedula)) {
-      newErrors.cedula = "La cédula debe contener entre 7 y 8 dígitos numéricos";
-    }
-
-    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,}$/.test(formData.firstName)) {
-      newErrors.firstName = "El nombre debe contener solo letras y tener al menos 2 caracteres";
-    }
-
-    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,}$/.test(formData.lastName)) {
-      newErrors.lastName = "El apellido debe contener solo letras y tener al menos 2 caracteres";
-    }
-
-    if (formData.phone && !/^\d{4}-\d{7}$/.test(formData.phone)) {
-      newErrors.phone = "El teléfono debe tener el formato XXXX-XXXXXXX";
-    }
-
-    setErrors(newErrors);
-    return !Object.values(newErrors).some(error => error !== "");
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
+    
+    const validation = validateOperarioForm(formData);
+    setErrors(validation.errors);
+    
+    if (!validation.isValid) {
       toast({
         variant: "destructive",
         title: "Error de validación",
@@ -84,31 +52,27 @@ export const OperarioForm = () => {
     try {
       let photoUrl = null;
 
-      // Solo intentar subir la foto si se seleccionó una
       if (formData.photo) {
         const fileExt = formData.photo.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
 
-        // Primero crear el bucket si no existe
         const { data: bucketData, error: bucketError } = await supabase
           .storage
           .createBucket('operators-photos', {
             public: true,
-            fileSizeLimit: 1024 * 1024 * 2, // 2MB
+            fileSizeLimit: 1024 * 1024 * 2,
           });
 
         if (bucketError && bucketError.message !== 'Bucket already exists') {
           throw bucketError;
         }
 
-        // Subir la foto
         const { error: uploadError, data: uploadData } = await supabase.storage
           .from('operators-photos')
           .upload(fileName, formData.photo);
 
         if (uploadError) throw uploadError;
 
-        // Obtener la URL pública
         const { data: { publicUrl } } = supabase.storage
           .from('operators-photos')
           .getPublicUrl(fileName);
@@ -116,7 +80,6 @@ export const OperarioForm = () => {
         photoUrl = publicUrl;
       }
 
-      // Insertar el operario en la base de datos
       const { error: insertError } = await supabase
         .from('operators')
         .insert({
@@ -171,76 +134,59 @@ export const OperarioForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="cedula">Cédula *</Label>
-        <Input
-          id="cedula"
-          name="cedula"
-          value={formData.cedula}
-          onChange={handleInputChange}
-          className={errors.cedula ? "border-red-500" : ""}
-        />
-        {errors.cedula && <p className="text-red-500 text-sm">{errors.cedula}</p>}
-      </div>
+      <FormField
+        id="cedula"
+        label="Cédula"
+        value={formData.cedula}
+        onChange={handleInputChange}
+        error={errors.cedula}
+        required
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="firstName">Nombre *</Label>
-        <Input
-          id="firstName"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleInputChange}
-          className={errors.firstName ? "border-red-500" : ""}
-        />
-        {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
-      </div>
+      <FormField
+        id="firstName"
+        label="Nombre"
+        value={formData.firstName}
+        onChange={handleInputChange}
+        error={errors.firstName}
+        required
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="lastName">Apellido *</Label>
-        <Input
-          id="lastName"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleInputChange}
-          className={errors.lastName ? "border-red-500" : ""}
-        />
-        {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
-      </div>
+      <FormField
+        id="lastName"
+        label="Apellido"
+        value={formData.lastName}
+        onChange={handleInputChange}
+        error={errors.lastName}
+        required
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="phone">Teléfono</Label>
-        <Input
-          id="phone"
-          name="phone"
-          value={formData.phone}
-          onChange={handleInputChange}
-          placeholder="XXXX-XXXXXXX (Opcional)"
-          className={errors.phone ? "border-red-500" : ""}
-        />
-        {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-      </div>
+      <FormField
+        id="phone"
+        label="Teléfono"
+        value={formData.phone}
+        onChange={handleInputChange}
+        error={errors.phone}
+        placeholder="XXXX-XXXXXXX (Opcional)"
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="email">Email (Opcional)</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleInputChange}
-        />
-      </div>
+      <FormField
+        id="email"
+        label="Email"
+        type="email"
+        value={formData.email}
+        onChange={handleInputChange}
+        placeholder="(Opcional)"
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="photo">Foto (Opcional)</Label>
-        <Input
-          id="photo"
-          name="photo"
-          type="file"
-          accept="image/*"
-          onChange={handleInputChange}
-        />
-      </div>
+      <FormField
+        id="photo"
+        label="Foto"
+        type="file"
+        value=""
+        onChange={handleInputChange}
+        placeholder="(Opcional)"
+      />
 
       <Button type="submit" className="w-full">
         Registrar Operario
