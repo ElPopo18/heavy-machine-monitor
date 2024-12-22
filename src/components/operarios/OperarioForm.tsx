@@ -56,23 +56,17 @@ export const OperarioForm = () => {
         const fileExt = formData.photo.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
 
-        const { data: bucketData, error: bucketError } = await supabase
-          .storage
-          .createBucket('operators-photos', {
-            public: true,
-            fileSizeLimit: 1024 * 1024 * 2,
-          });
-
-        if (bucketError && bucketError.message !== 'Bucket already exists') {
-          throw bucketError;
-        }
-
+        // Upload photo to storage
         const { error: uploadError, data: uploadData } = await supabase.storage
           .from('operators-photos')
           .upload(fileName, formData.photo);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Error uploading photo:', uploadError);
+          throw uploadError;
+        }
 
+        // Get the public URL of the uploaded photo
         const { data: { publicUrl } } = supabase.storage
           .from('operators-photos')
           .getPublicUrl(fileName);
@@ -80,24 +74,29 @@ export const OperarioForm = () => {
         photoUrl = publicUrl;
       }
 
+      // Insert operator data into the database
       const { error: insertError } = await supabase
         .from('operators')
         .insert({
           cedula: formData.cedula,
           first_name: formData.firstName,
           last_name: formData.lastName,
-          phone: formData.phone || null,
+          phone: formData.phone,
           email: formData.email || null,
           photo_url: photoUrl,
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error inserting operator:', insertError);
+        throw insertError;
+      }
 
       toast({
         title: "Operario registrado exitosamente",
         description: "Los datos han sido guardados en la base de datos",
       });
 
+      // Navigate to operators list page after successful submission
       navigate('/operarios');
     } catch (error) {
       console.error('Error:', error);
