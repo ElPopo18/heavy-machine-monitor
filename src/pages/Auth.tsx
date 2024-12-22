@@ -42,6 +42,8 @@ const Auth = () => {
               },
             }}
             providers={[]}
+            redirectTo={window.location.origin}
+            showLinks={false}
           />
         </div>
       </div>
