@@ -18,6 +18,7 @@ interface FormData {
 export const OperarioForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [formData, setFormData] = React.useState<FormData>({
     cedula: "",
     firstName: "",
@@ -49,14 +50,27 @@ export const OperarioForm = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       let photoUrl = null;
 
       if (formData.photo) {
-        const fileExt = formData.photo.name.split('.').pop();
+        const fileExt = formData.photo.name.split('.').pop()?.toLowerCase();
+        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
+        
+        if (!fileExt || !validExtensions.includes(fileExt)) {
+          toast({
+            variant: "destructive",
+            title: "Error de archivo",
+            description: "Por favor, seleccione una imagen válida (jpg, jpeg, png, gif, svg)",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
         const fileName = `${Math.random()}.${fileExt}`;
 
-        // Upload photo to storage
         const { error: uploadError, data: uploadData } = await supabase.storage
           .from('operators-photos')
           .upload(fileName, formData.photo);
@@ -66,7 +80,6 @@ export const OperarioForm = () => {
           throw uploadError;
         }
 
-        // Get the public URL of the uploaded photo
         const { data: { publicUrl } } = supabase.storage
           .from('operators-photos')
           .getPublicUrl(fileName);
@@ -74,7 +87,6 @@ export const OperarioForm = () => {
         photoUrl = publicUrl;
       }
 
-      // Insert operator data into the database
       const { error: insertError } = await supabase
         .from('operators')
         .insert({
@@ -96,7 +108,6 @@ export const OperarioForm = () => {
         description: "Los datos han sido guardados en la base de datos",
       });
 
-      // Navigate to operators list page after successful submission
       navigate('/operarios');
     } catch (error) {
       console.error('Error:', error);
@@ -105,6 +116,8 @@ export const OperarioForm = () => {
         title: "Error al registrar operario",
         description: "Hubo un problema al guardar los datos. Por favor intente nuevamente.",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -112,9 +125,23 @@ export const OperarioForm = () => {
     const { name, value, type, files } = e.target;
     
     if (type === 'file' && files) {
+      const file = files[0];
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
+      
+      if (!fileExt || !validExtensions.includes(fileExt)) {
+        toast({
+          variant: "destructive",
+          title: "Error de archivo",
+          description: "Por favor, seleccione una imagen válida (jpg, jpeg, png, gif, svg)",
+        });
+        e.target.value = '';
+        return;
+      }
+      
       setFormData(prev => ({
         ...prev,
-        photo: files[0],
+        photo: file,
       }));
     } else {
       if (name === 'phone') {
@@ -182,13 +209,18 @@ export const OperarioForm = () => {
         id="photo"
         label="Foto"
         type="file"
+        accept=".jpg,.jpeg,.png,.gif,.svg"
         value=""
         onChange={handleInputChange}
         placeholder="(Opcional)"
       />
 
-      <Button type="submit" className="w-full">
-        Registrar Operario
+      <Button 
+        type="submit" 
+        className="w-full"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Registrando...' : 'Registrar Operario'}
       </Button>
     </form>
   );
