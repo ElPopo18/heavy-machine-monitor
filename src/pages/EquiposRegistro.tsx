@@ -117,12 +117,16 @@ const EquiposRegistro = () => {
     }
 
     try {
-      // Verificar si el código ya existe
-      const { data: existingEquipment } = await supabase
+      // Verificar si el código ya existe usando maybeSingle() en lugar de single()
+      const { data: existingEquipment, error: checkError } = await supabase
         .from('equipment')
         .select('id')
         .eq('code', formData.code)
-        .single();
+        .maybeSingle();
+
+      if (checkError) {
+        throw checkError;
+      }
 
       if (existingEquipment) {
         setErrors(prev => ({
