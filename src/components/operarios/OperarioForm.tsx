@@ -3,14 +3,26 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "./FormField";
 import { useOperarioForm } from "./hooks/useOperarioForm";
 
-export const OperarioForm = () => {
+interface OperarioFormProps {
+  initialData?: {
+    cedula: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+    photo: File | null;
+  } | null;
+  operatorId?: string;
+}
+
+export const OperarioForm = ({ initialData, operatorId }: OperarioFormProps) => {
   const {
     formData,
     errors,
     isSubmitting,
     handleSubmit,
     handleInputChange,
-  } = useOperarioForm();
+  } = useOperarioForm(initialData, operatorId);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -74,7 +86,7 @@ export const OperarioForm = () => {
         className="w-full"
         disabled={isSubmitting}
       >
-        {isSubmitting ? 'Registrando...' : 'Registrar Operario'}
+        {isSubmitting ? 'Guardando...' : operatorId ? 'Guardar Cambios' : 'Registrar Operario'}
       </Button>
     </form>
   );

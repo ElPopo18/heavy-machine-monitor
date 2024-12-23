@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateOperarioForm } from "../utils/validation";
 import type { FormData } from "../types";
 
-export const useOperarioForm = () => {
+export const useOperarioForm = (initialData?: FormData | null, operatorId?: string) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,6 +24,12 @@ export const useOperarioForm = () => {
     lastName: "",
     phone: "",
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,24 +93,36 @@ export const useOperarioForm = () => {
         photoUrl = publicUrl;
       }
 
-      const { error: insertError } = await supabase
-        .from('operators')
-        .insert({
-          cedula: formData.cedula,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-          email: formData.email || null,
-          photo_url: photoUrl,
-        });
+      const operatorData = {
+        cedula: formData.cedula,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        email: formData.email || null,
+        ...(photoUrl && { photo_url: photoUrl }),
+      };
 
-      if (insertError) {
-        console.error('Error inserting operator:', insertError);
-        throw insertError;
+      let error;
+
+      if (operatorId) {
+        // Update existing operator
+        const { error: updateError } = await supabase
+          .from('operators')
+          .update(operatorData)
+          .eq('id', operatorId);
+        error = updateError;
+      } else {
+        // Create new operator
+        const { error: insertError } = await supabase
+          .from('operators')
+          .insert(operatorData);
+        error = insertError;
       }
 
+      if (error) throw error;
+
       toast({
-        title: "Operario registrado exitosamente",
+        title: operatorId ? "Operario actualizado exitosamente" : "Operario registrado exitosamente",
         description: "Los datos han sido guardados en la base de datos",
       });
 
@@ -113,7 +131,7 @@ export const useOperarioForm = () => {
       console.error('Error:', error);
       toast({
         variant: "destructive",
-        title: "Error al registrar operario",
+        title: operatorId ? "Error al actualizar operario" : "Error al registrar operario",
         description: "Hubo un problema al guardar los datos. Por favor intente nuevamente.",
       });
     } finally {
@@ -126,23 +144,25 @@ export const useOperarioForm = () => {
     
     if (type === 'file' && files) {
       const file = files[0];
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
-      
-      if (!fileExt || !validExtensions.includes(fileExt)) {
-        toast({
-          variant: "destructive",
-          title: "Error de archivo",
-          description: "Por favor, seleccione una imagen válida (jpg, jpeg, png, gif, svg)",
-        });
-        e.target.value = '';
-        return;
+      if (file) {
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
+        
+        if (!fileExt || !validExtensions.includes(fileExt)) {
+          toast({
+            variant: "destructive",
+            title: "Error de archivo",
+            description: "Por favor, seleccione una imagen válida (jpg, jpeg, png, gif, svg)",
+          });
+          e.target.value = '';
+          return;
+        }
+        
+        setFormData(prev => ({
+          ...prev,
+          photo: file,
+        }));
       }
-      
-      setFormData(prev => ({
-        ...prev,
-        photo: file,
-      }));
     } else {
       if (name === 'phone') {
         const cleaned = value.replace(/\D/g, '');

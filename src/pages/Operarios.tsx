@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash, PlusCircle } from "lucide-react";
+import { Trash, PlusCircle, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -107,14 +107,24 @@ const Operarios = () => {
                       <h3 className="font-semibold">{operator.first_name} {operator.last_name}</h3>
                       <p className="text-sm text-muted-foreground">{operator.phone}</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(operator.id)}
-                      className="text-destructive hover:text-destructive/90"
-                    >
-                      <Trash className="h-5 w-5" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/operarios/editar/${operator.id}`)}
+                        className="text-primary hover:text-primary/90"
+                      >
+                        <Pencil className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(operator.id)}
+                        className="text-destructive hover:text-destructive/90"
+                      >
+                        <Trash className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

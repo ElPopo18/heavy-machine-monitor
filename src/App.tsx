@@ -5,6 +5,7 @@ import Equipos from "@/pages/Equipos";
 import EquiposRegistro from "@/pages/EquiposRegistro";
 import Operarios from "@/pages/Operarios";
 import OperariosRegistro from "@/pages/OperariosRegistro";
+import OperariosEditar from "@/pages/OperariosEditar";
 import Marcas from "@/pages/Marcas";
 import MantenimientoRegistro from "@/pages/MantenimientoRegistro";
 import MantenimientoCalendario from "@/pages/MantenimientoCalendario";
@@ -19,6 +20,7 @@ function App() {
         <Route path="/equipos/registro" element={<EquiposRegistro />} />
         <Route path="/operarios" element={<Operarios />} />
         <Route path="/operarios/registro" element={<OperariosRegistro />} />
+        <Route path="/operarios/editar/:id" element={<OperariosEditar />} />
         <Route path="/marcas" element={<Marcas />} />
         <Route path="/mantenimiento/registro" element={<MantenimientoRegistro />} />
         <Route path="/mantenimiento/calendario" element={<MantenimientoCalendario />} />
