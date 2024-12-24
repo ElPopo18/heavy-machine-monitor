@@ -4,6 +4,7 @@ import { es } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface MaintenanceEvent {
   id: string;
@@ -21,6 +22,7 @@ interface MaintenanceEvent {
 const MaintenanceCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [maintenanceEvents, setMaintenanceEvents] = useState<MaintenanceEvent[]>([]);
+  const [selectedEvents, setSelectedEvents] = useState<MaintenanceEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -76,19 +78,9 @@ const MaintenanceCalendar = () => {
       const eventsForDay = maintenanceEvents.filter(
         (event) => event.scheduled_date === format(date, "yyyy-MM-dd")
       );
-
-      if (eventsForDay.length > 0) {
-        eventsForDay.forEach((event) => {
-          toast({
-            title: `Mantenimiento: ${event.equipment.name}`,
-            description: `Operario: ${event.operator.first_name} ${
-              event.operator.last_name
-            }\nFecha: ${format(new Date(event.scheduled_date), "dd/MM/yyyy", {
-              locale: es,
-            })}${event.observations ? `\nObservaciones: ${event.observations}` : ""}`,
-          });
-        });
-      }
+      setSelectedEvents(eventsForDay);
+    } else {
+      setSelectedEvents([]);
     }
   };
 
@@ -97,19 +89,61 @@ const MaintenanceCalendar = () => {
   }
 
   return (
-    <div className="p-4">
-      <Calendar
-        mode="single"
-        selected={selectedDate}
-        onSelect={handleSelect}
-        className="rounded-md border"
-        components={{
-          DayContent: ({ date }) => getDayContent(date),
-        }}
-      />
-      <p className="text-sm text-muted-foreground mt-4">
-        * Los días con mantenimientos programados están marcados con una línea
-      </p>
+    <div className="flex gap-6">
+      <div>
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={handleSelect}
+          className="rounded-md border"
+          components={{
+            DayContent: ({ date }) => getDayContent(date),
+          }}
+        />
+        <p className="text-sm text-muted-foreground mt-4">
+          * Los días con mantenimientos programados están marcados con una línea
+        </p>
+      </div>
+
+      <div className="flex-1">
+        {selectedEvents.length > 0 ? (
+          <div className="space-y-4">
+            {selectedEvents.map((event) => (
+              <Card key={event.id}>
+                <CardHeader>
+                  <CardTitle>Mantenimiento: {event.equipment.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p>
+                    <span className="font-medium">Operario:</span> {event.operator.first_name}{" "}
+                    {event.operator.last_name}
+                  </p>
+                  <p>
+                    <span className="font-medium">Fecha:</span>{" "}
+                    {format(new Date(event.scheduled_date), "dd/MM/yyyy", {
+                      locale: es,
+                    })}
+                  </p>
+                  {event.observations && (
+                    <p>
+                      <span className="font-medium">Observaciones:</span>{" "}
+                      {event.observations}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : selectedDate ? (
+          <p className="text-muted-foreground">
+            No hay mantenimientos programados para esta fecha.
+          </p>
+        ) : (
+          <p className="text-muted-foreground">
+            Selecciona una fecha para ver los mantenimientos programados.
+          </p>
+        )}
+      </div>
     </div>
   );
 };
