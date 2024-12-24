@@ -39,6 +39,8 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
   const [scheduledDate, setScheduledDate] = useState("");
   const [observations, setObservations] = useState("");
   const [loading, setLoading] = useState(true);
+  const [originalOperatorId, setOriginalOperatorId] = useState("");
+  const [originalDate, setOriginalDate] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +72,9 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
           setSelectedOperator(maintenanceData.operator_id);
           setScheduledDate(maintenanceData.scheduled_date);
           setObservations(maintenanceData.observations || "");
+          // Store original values for comparison
+          setOriginalOperatorId(maintenanceData.operator_id);
+          setOriginalDate(maintenanceData.scheduled_date);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -98,6 +103,41 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
       return;
     }
 
+    // Only update if there are changes
+    if (
+      selectedOperator === originalOperatorId &&
+      scheduledDate === originalDate
+    ) {
+      // If only equipment or observations changed, proceed with update
+      try {
+        const { error } = await supabase
+          .from("maintenance")
+          .update({
+            equipment_id: selectedEquipment,
+            observations: observations || null,
+          })
+          .eq("id", maintenanceId);
+
+        if (error) throw error;
+
+        toast({
+          title: "Mantenimiento actualizado",
+          description: "El mantenimiento ha sido actualizado exitosamente",
+        });
+
+        navigate("/mantenimiento/calendario");
+      } catch (error: any) {
+        console.error("Error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Error al actualizar el mantenimiento",
+        });
+      }
+      return;
+    }
+
+    // If operator or date changed, we need to check for conflicts
     try {
       const { error } = await supabase
         .from("maintenance")
@@ -109,7 +149,18 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
         })
         .eq("id", maintenanceId);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505") {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description:
+              "El operario ya tiene una actividad programada para esta fecha",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Mantenimiento actualizado",
@@ -119,16 +170,10 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
       navigate("/mantenimiento/calendario");
     } catch (error: any) {
       console.error("Error:", error);
-      let errorMessage = "Error al actualizar el mantenimiento";
-      
-      if (error.code === "23505") {
-        errorMessage = "El operario ya tiene una actividad programada para esta fecha";
-      }
-
       toast({
         variant: "destructive",
         title: "Error",
-        description: errorMessage,
+        description: "Error al actualizar el mantenimiento",
       });
     }
   };
