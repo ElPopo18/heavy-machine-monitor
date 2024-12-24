@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
@@ -120,7 +120,7 @@ const MaintenanceCalendar = () => {
                   </p>
                   <p>
                     <span className="font-medium">Fecha:</span>{" "}
-                    {format(new Date(event.scheduled_date), "dd/MM/yyyy", {
+                    {format(parseISO(event.scheduled_date), "dd/MM/yyyy", {
                       locale: es,
                     })}
                   </p>
