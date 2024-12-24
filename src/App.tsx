@@ -13,6 +13,7 @@ import OperariosEditar from "@/pages/OperariosEditar";
 import Marcas from "@/pages/Marcas";
 import MantenimientoRegistro from "@/pages/MantenimientoRegistro";
 import MantenimientoCalendario from "@/pages/MantenimientoCalendario";
+import MantenimientoEditar from "@/pages/MantenimientoEditar";
 import Auth from "@/pages/Auth";
 
 function App() {
@@ -93,6 +94,12 @@ function App() {
             ) : (
               <Navigate to="/auth" replace />
             )
+          }
+        />
+        <Route
+          path="/mantenimiento/editar/:id"
+          element={
+            session ? <MantenimientoEditar /> : <Navigate to="/auth" replace />
           }
         />
         <Route
