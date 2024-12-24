@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "@/pages/Index";
 import Equipos from "@/pages/Equipos";
 import EquiposRegistro from "@/pages/EquiposRegistro";
@@ -43,70 +44,72 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={session ? <Index /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/equipos"
-          element={session ? <Equipos /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/equipos/registro"
-          element={session ? <EquiposRegistro /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/equipos/editar/:id"
-          element={session ? <EquiposEditar /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/operarios"
-          element={session ? <Operarios /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/operarios/registro"
-          element={
-            session ? <OperariosRegistro /> : <Navigate to="/auth" replace />
-          }
-        />
-        <Route
-          path="/operarios/editar/:id"
-          element={
-            session ? <OperariosEditar /> : <Navigate to="/auth" replace />
-          }
-        />
-        <Route
-          path="/marcas"
-          element={session ? <Marcas /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/mantenimiento/registro"
-          element={
-            session ? <MantenimientoRegistro /> : <Navigate to="/auth" replace />
-          }
-        />
-        <Route
-          path="/mantenimiento/calendario"
-          element={
-            session ? (
-              <MantenimientoCalendario />
-            ) : (
-              <Navigate to="/auth" replace />
-            )
-          }
-        />
-        <Route
-          path="/mantenimiento/editar/:id"
-          element={
-            session ? <MantenimientoEditar /> : <Navigate to="/auth" replace />
-          }
-        />
-        <Route
-          path="/auth"
-          element={!session ? <Auth /> : <Navigate to="/" replace />}
-        />
-      </Routes>
+      <AppLayout>
+        <Routes>
+          <Route
+            path="/"
+            element={session ? <Index /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/equipos"
+            element={session ? <Equipos /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/equipos/registro"
+            element={session ? <EquiposRegistro /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/equipos/editar/:id"
+            element={session ? <EquiposEditar /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/operarios"
+            element={session ? <Operarios /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/operarios/registro"
+            element={
+              session ? <OperariosRegistro /> : <Navigate to="/auth" replace />
+            }
+          />
+          <Route
+            path="/operarios/editar/:id"
+            element={
+              session ? <OperariosEditar /> : <Navigate to="/auth" replace />
+            }
+          />
+          <Route
+            path="/marcas"
+            element={session ? <Marcas /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/mantenimiento/registro"
+            element={
+              session ? <MantenimientoRegistro /> : <Navigate to="/auth" replace />
+            }
+          />
+          <Route
+            path="/mantenimiento/calendario"
+            element={
+              session ? (
+                <MantenimientoCalendario />
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            }
+          />
+          <Route
+            path="/mantenimiento/editar/:id"
+            element={
+              session ? <MantenimientoEditar /> : <Navigate to="/auth" replace />
+            }
+          />
+          <Route
+            path="/auth"
+            element={!session ? <Auth /> : <Navigate to="/" replace />}
+          />
+        </Routes>
+      </AppLayout>
       <Toaster />
     </Router>
   );
