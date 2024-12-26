@@ -1,93 +1,78 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { 
+  Wrench, 
+  Calendar, 
+  Truck, 
+  Users, 
+  Building2 
+} from "lucide-react";
 
 const Index = () => {
-  const { toast } = useToast();
-
-  const { data: maintenanceCount, isLoading: isLoadingMaintenance } = useQuery({
-    queryKey: ["maintenanceCount"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("maintenance")
-        .select("*", { count: "exact", head: true });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "No se pudo cargar el conteo de mantenimientos",
-        });
-        throw error;
-      }
-
-      return count || 0;
-    },
-  });
-
-  const { data: equipmentCount, isLoading: isLoadingEquipment } = useQuery({
-    queryKey: ["equipmentCount"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("equipment")
-        .select("*", { count: "exact", head: true });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "No se pudo cargar el conteo de equipos",
-        });
-        throw error;
-      }
-
-      return count || 0;
-    },
-  });
-
-  const { data: operatorsCount, isLoading: isLoadingOperators } = useQuery({
-    queryKey: ["operatorsCount"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("operators")
-        .select("*", { count: "exact", head: true });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "No se pudo cargar el conteo de operarios",
-        });
-        throw error;
-      }
-
-      return count || 0;
-    },
-  });
-
-  if (isLoadingMaintenance || isLoadingEquipment || isLoadingOperators) {
-    return <div>Cargando...</div>;
-  }
-
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Panel de Control</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">Mantenimientos</h2>
-          <p className="text-3xl font-bold">{maintenanceCount}</p>
-          <p className="text-gray-600">Programados</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">Equipos</h2>
-          <p className="text-3xl font-bold">{equipmentCount}</p>
-          <p className="text-gray-600">Registrados</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">Operarios</h2>
-          <p className="text-3xl font-bold">{operatorsCount}</p>
-          <p className="text-gray-600">Activos</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Link to="/mantenimiento/registro">
+          <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <Wrench className="h-8 w-8 text-blue-500" />
+              <div>
+                <h2 className="text-xl font-semibold">Registrar Mantenimiento</h2>
+                <p className="text-gray-600">Programa nuevos mantenimientos</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        <Link to="/mantenimiento/calendario">
+          <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <Calendar className="h-8 w-8 text-green-500" />
+              <div>
+                <h2 className="text-xl font-semibold">Calendario</h2>
+                <p className="text-gray-600">Ver mantenimientos programados</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        <Link to="/equipos">
+          <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <Truck className="h-8 w-8 text-yellow-500" />
+              <div>
+                <h2 className="text-xl font-semibold">Equipos</h2>
+                <p className="text-gray-600">Gestionar equipos</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        <Link to="/operarios">
+          <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <Users className="h-8 w-8 text-purple-500" />
+              <div>
+                <h2 className="text-xl font-semibold">Operarios</h2>
+                <p className="text-gray-600">Gestionar operarios</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        <Link to="/marcas">
+          <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <Building2 className="h-8 w-8 text-red-500" />
+              <div>
+                <h2 className="text-xl font-semibold">Marcas</h2>
+                <p className="text-gray-600">Gestionar marcas de equipos</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
       </div>
     </div>
   );
