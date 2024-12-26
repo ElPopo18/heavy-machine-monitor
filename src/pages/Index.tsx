@@ -1,53 +1,92 @@
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error al cerrar sesión");
-      return;
-    }
-    toast.success("Sesión cerrada exitosamente");
-    navigate("/auth");
-  };
+  const { data: maintenanceCount, isLoading: isLoadingMaintenance } = useQuery({
+    queryKey: ["maintenanceCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("maintenance")
+        .select("*", { count: "exact", head: true });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo cargar el conteo de mantenimientos",
+        });
+        throw error;
+      }
+
+      return count || 0;
+    },
+  });
+
+  const { data: equipmentCount, isLoading: isLoadingEquipment } = useQuery({
+    queryKey: ["equipmentCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("equipment")
+        .select("*", { count: "exact", head: true });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo cargar el conteo de equipos",
+        });
+        throw error;
+      }
+
+      return count || 0;
+    },
+  });
+
+  const { data: operatorsCount, isLoading: isLoadingOperators } = useQuery({
+    queryKey: ["operatorsCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("operators")
+        .select("*", { count: "exact", head: true });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo cargar el conteo de operarios",
+        });
+        throw error;
+      }
+
+      return count || 0;
+    },
+  });
+
+  if (isLoadingMaintenance || isLoadingEquipment || isLoadingOperators) {
+    return <div>Cargando...</div>;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header with logout button */}
-      <div className="w-full p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Sistema de Gestión</h1>
-        <Button 
-          variant="outline" 
-          onClick={handleLogout}
-          className="text-destructive hover:text-destructive"
-        >
-          Cerrar Sesión
-        </Button>
-      </div>
-
-      {/* Main content centered */}
-      <div className="flex-1 container mx-auto p-4 flex flex-col items-center justify-center">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-4xl w-full">
-          <Button onClick={() => navigate("/equipos")} className="h-32">
-            Gestión de Equipos
-          </Button>
-          <Button onClick={() => navigate("/operarios")} className="h-32">
-            Gestión de Operarios
-          </Button>
-          <Button onClick={() => navigate("/marcas")} className="h-32">
-            Gestión de Marcas
-          </Button>
-          <Button onClick={() => navigate("/mantenimiento/registro")} className="h-32">
-            Mantenimiento
-          </Button>
-          <Button onClick={() => navigate("/mantenimiento/calendario")} className="h-32">
-            Calendario de Mantenimientos
-          </Button>
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Panel de Control</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-2">Mantenimientos</h2>
+          <p className="text-3xl font-bold">{maintenanceCount}</p>
+          <p className="text-gray-600">Programados</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-2">Equipos</h2>
+          <p className="text-3xl font-bold">{equipmentCount}</p>
+          <p className="text-gray-600">Registrados</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-2">Operarios</h2>
+          <p className="text-3xl font-bold">{operatorsCount}</p>
+          <p className="text-gray-600">Activos</p>
         </div>
       </div>
     </div>
