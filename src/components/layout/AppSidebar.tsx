@@ -53,19 +53,12 @@ export function AppSidebar() {
   // Don't show sidebar on these paths
   const excludedPaths = [
     "/",
-    "/auth",
-    "/equipos/registro",
-    "/equipos/editar",
-    "/operarios/registro",
-    "/operarios/editar",
-    "/mantenimiento/registro",
-    "/mantenimiento/editar",
+    "/auth"
   ];
 
   // Check if current path starts with any excluded path
   const shouldHideSidebar = excludedPaths.some(path => 
-    currentPath === path || 
-    (path.endsWith("/editar") && currentPath.startsWith(path))
+    currentPath === path
   );
 
   if (shouldHideSidebar) {
