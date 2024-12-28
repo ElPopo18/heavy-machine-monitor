@@ -23,10 +23,10 @@ export const DashboardCard = ({
         <div className="flex items-center gap-4">
           <Icon className={`h-8 w-8 ${iconColor}`} />
           <div>
-            <h2 className="text-xl font-semibold text-white group-hover:text-gray-800 transition-colors">
+            <h2 className="text-xl font-semibold text-white group-hover:text-black transition-colors">
               {title}
             </h2>
-            <p className="text-white group-hover:text-gray-600 transition-colors">
+            <p className="text-white group-hover:text-black transition-colors">
               {description}
             </p>
           </div>
