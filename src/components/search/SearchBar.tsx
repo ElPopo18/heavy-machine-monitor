@@ -96,8 +96,8 @@ export const SearchBar = () => {
                     )}
                   </div>
                   <div>
-                    <div className="font-medium">{result.name}</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="font-medium text-black">{result.name}</div>
+                    <div className="text-sm text-black">
                       {result.type === 'operator' ? 'Operario' : 'Equipo'}
                     </div>
                   </div>
