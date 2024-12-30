@@ -1,37 +1,11 @@
 import { useState, useEffect } from "react";
-import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
+import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
-interface MaintenanceEvent {
-  id: string;
-  scheduled_date: string;
-  equipment: {
-    name: string;
-  };
-  operator: {
-    first_name: string;
-    last_name: string;
-  };
-  observations: string | null;
-}
+import { MaintenanceEvent } from "./types";
+import { MaintenanceEventCard } from "./MaintenanceEventCard";
+import { isFutureOrToday, formatDate } from "./utils/dateUtils";
 
 const MaintenanceCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -39,7 +13,6 @@ const MaintenanceCalendar = () => {
   const [selectedEvents, setSelectedEvents] = useState<MaintenanceEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMaintenanceEvents();
@@ -59,7 +32,12 @@ const MaintenanceCalendar = () => {
 
       if (error) throw error;
 
-      setMaintenanceEvents(data || []);
+      // Filter out past events
+      const futureEvents = (data || []).filter((event) => 
+        isFutureOrToday(event.scheduled_date)
+      );
+
+      setMaintenanceEvents(futureEvents);
     } catch (error) {
       console.error("Error fetching maintenance events:", error);
       toast({
@@ -86,11 +64,10 @@ const MaintenanceCalendar = () => {
         description: "El mantenimiento ha sido eliminado exitosamente",
       });
 
-      // Refresh the events list and update the selected events
       await fetchMaintenanceEvents();
       if (selectedDate) {
         const updatedEventsForDay = maintenanceEvents.filter(
-          (event) => event.scheduled_date === format(selectedDate, "yyyy-MM-dd") && event.id !== id
+          (event) => formatDate(event.scheduled_date) === format(selectedDate, "yyyy-MM-dd") && event.id !== id
         );
         setSelectedEvents(updatedEventsForDay);
       }
@@ -104,14 +81,9 @@ const MaintenanceCalendar = () => {
     }
   };
 
-  const handleEdit = (id: string) => {
-    // Navigate to edit page (you'll need to implement this page)
-    navigate(`/mantenimiento/editar/${id}`);
-  };
-
   const getDayContent = (day: Date) => {
     const eventsForDay = maintenanceEvents.filter(
-      (event) => event.scheduled_date === format(day, "yyyy-MM-dd")
+      (event) => formatDate(event.scheduled_date) === format(day, "yyyy-MM-dd")
     );
 
     return (
@@ -128,7 +100,7 @@ const MaintenanceCalendar = () => {
     setSelectedDate(date);
     if (date) {
       const eventsForDay = maintenanceEvents.filter(
-        (event) => event.scheduled_date === format(date, "yyyy-MM-dd")
+        (event) => formatDate(event.scheduled_date) === format(date, "yyyy-MM-dd")
       );
       setSelectedEvents(eventsForDay);
     } else {
@@ -161,64 +133,11 @@ const MaintenanceCalendar = () => {
         {selectedEvents.length > 0 ? (
           <div className="space-y-4">
             {selectedEvents.map((event) => (
-              <Card key={event.id}>
-                <CardHeader>
-                  <CardTitle>Mantenimiento: {event.equipment.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <p>
-                    <span className="font-medium">Operario:</span> {event.operator.first_name}{" "}
-                    {event.operator.last_name}
-                  </p>
-                  <p>
-                    <span className="font-medium">Fecha:</span>{" "}
-                    {format(parseISO(event.scheduled_date), "dd/MM/yyyy", {
-                      locale: es,
-                    })}
-                  </p>
-                  {event.observations && (
-                    <p>
-                      <span className="font-medium">Observaciones:</span>{" "}
-                      {event.observations}
-                    </p>
-                  )}
-                </CardContent>
-                <CardFooter className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(event.id)}
-                  >
-                    <Pencil className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm">
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Eliminar
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Esta acción no se puede deshacer. Se eliminará permanentemente este
-                          mantenimiento programado.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(event.id)}
-                        >
-                          Eliminar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </CardFooter>
-              </Card>
+              <MaintenanceEventCard
+                key={event.id}
+                event={event}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         ) : selectedDate ? (
