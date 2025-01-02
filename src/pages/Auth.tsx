@@ -5,6 +5,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { AuthError, AuthChangeEvent } from "@supabase/supabase-js";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -12,11 +13,11 @@ const Auth = () => {
 
   useEffect(() => {
     // Check if user is already logged in
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange((event: AuthChangeEvent, session) => {
       if (event === 'SIGNED_IN' && session) {
         navigate("/");
       }
-      if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT') {
         navigate("/auth");
       }
     });
@@ -30,6 +31,11 @@ const Auth = () => {
     };
     checkSession();
   }, [navigate]);
+
+  const handleError = (error: AuthError) => {
+    console.error('Auth error:', error);
+    setError(error.message);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -73,9 +79,19 @@ const Auth = () => {
             }}
             providers={[]}
             redirectTo={window.location.origin}
-            onError={(error) => {
-              console.error('Auth error:', error);
-              setError(error.message);
+            localization={{
+              variables: {
+                sign_in: {
+                  email_label: 'Correo electrónico',
+                  password_label: 'Contraseña',
+                  button_label: 'Iniciar sesión',
+                },
+                sign_up: {
+                  email_label: 'Correo electrónico',
+                  password_label: 'Contraseña',
+                  button_label: 'Registrarse',
+                },
+              },
             }}
           />
         </div>
