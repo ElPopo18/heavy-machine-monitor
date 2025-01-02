@@ -31,6 +31,21 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
     }
   }, [initialData]);
 
+  const checkCedulaExists = async (cedula: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from('operators')
+      .select('id')
+      .eq('cedula', cedula)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking cédula:', error);
+      return false;
+    }
+
+    return !!data;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -59,6 +74,20 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
     setIsSubmitting(true);
 
     try {
+      // Check if cédula exists (only for new operators)
+      if (!operatorId) {
+        const cedulaExists = await checkCedulaExists(formData.cedula);
+        if (cedulaExists) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Ya existe un operario registrado con esta cédula",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       let photoUrl = null;
 
       if (formData.photo) {
