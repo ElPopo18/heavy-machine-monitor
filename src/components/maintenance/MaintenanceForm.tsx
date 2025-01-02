@@ -77,11 +77,25 @@ const MaintenanceForm = () => {
     }
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Debe iniciar sesión para registrar un mantenimiento",
+        });
+        return;
+      }
+
       const { error } = await supabase.from("maintenance").insert({
         equipment_id: selectedEquipment,
         operator_id: selectedOperator,
         scheduled_date: scheduledDate,
         observations: observations || null,
+        user_id: user.id,
       });
 
       if (error) throw error;
