@@ -81,7 +81,7 @@ const navigationItems = [
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  // Initialize with an empty array so all menus start collapsed
+  // Initialize with an empty array to ensure all menus start collapsed
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   // Don't show sidebar on these paths
