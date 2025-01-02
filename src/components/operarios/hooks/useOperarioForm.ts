@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateOperarioForm } from "../utils/validation";
+import { checkCedulaExists, uploadOperatorPhoto, saveOperator } from "../utils/operarioService";
 import type { FormData } from "../types";
 
 export const useOperarioForm = (initialData?: FormData | null, operatorId?: string) => {
@@ -30,26 +31,6 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
       setFormData(initialData);
     }
   }, [initialData]);
-
-  const checkCedulaExists = async (cedula: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase
-        .from('operators')
-        .select('id')
-        .eq('cedula', cedula)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking cédula:', error);
-        return false;
-      }
-
-      return !!data;
-    } catch (error) {
-      console.error('Error in checkCedulaExists:', error);
-      return false;
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,52 +60,30 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
     setIsSubmitting(true);
 
     try {
-      // Check if cédula exists (only for new operators)
-      if (!operatorId) {
-        const cedulaExists = await checkCedulaExists(formData.cedula);
-        if (cedulaExists) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Ya existe un operario registrado con esta cédula",
-          });
-          setIsSubmitting(false);
-          return;
-        }
+      // Check if cédula exists (considering the current operator for updates)
+      const cedulaExists = await checkCedulaExists(formData.cedula, operatorId);
+      if (cedulaExists) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Ya existe un operario registrado con esta cédula",
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       let photoUrl = null;
-
       if (formData.photo) {
-        const fileExt = formData.photo.name.split('.').pop()?.toLowerCase();
-        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
-        
-        if (!fileExt || !validExtensions.includes(fileExt)) {
+        photoUrl = await uploadOperatorPhoto(formData.photo);
+        if (!photoUrl) {
           toast({
             variant: "destructive",
-            title: "Error de archivo",
-            description: "Por favor, seleccione una imagen válida (jpg, jpeg, png, gif, svg)",
+            title: "Error",
+            description: "Error al subir la foto del operario",
           });
           setIsSubmitting(false);
           return;
         }
-
-        const fileName = `${Math.random()}.${fileExt}`;
-
-        const { error: uploadError, data: uploadData } = await supabase.storage
-          .from('operators-photos')
-          .upload(fileName, formData.photo);
-
-        if (uploadError) {
-          console.error('Error uploading photo:', uploadError);
-          throw uploadError;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('operators-photos')
-          .getPublicUrl(fileName);
-
-        photoUrl = publicUrl;
       }
 
       const operatorData = {
@@ -137,22 +96,7 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
         ...(photoUrl && { photo_url: photoUrl }),
       };
 
-      let error;
-
-      if (operatorId) {
-        // Update existing operator
-        const { error: updateError } = await supabase
-          .from('operators')
-          .update(operatorData)
-          .eq('id', operatorId);
-        error = updateError;
-      } else {
-        // Create new operator
-        const { error: insertError } = await supabase
-          .from('operators')
-          .insert(operatorData);
-        error = insertError;
-      }
+      const { error } = await saveOperator(operatorData, operatorId);
 
       if (error) throw error;
 
@@ -180,19 +124,6 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
     if (type === 'file' && files) {
       const file = files[0];
       if (file) {
-        const fileExt = file.name.split('.').pop()?.toLowerCase();
-        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
-        
-        if (!fileExt || !validExtensions.includes(fileExt)) {
-          toast({
-            variant: "destructive",
-            title: "Error de archivo",
-            description: "Por favor, seleccione una imagen válida (jpg, jpeg, png, gif, svg)",
-          });
-          e.target.value = '';
-          return;
-        }
-        
         setFormData(prev => ({
           ...prev,
           photo: file,
