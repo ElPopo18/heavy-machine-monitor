@@ -15,18 +15,21 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
           name: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
           name?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -39,6 +42,7 @@ export type Database = {
           id: string
           name: string
           photo_url: string | null
+          user_id: string | null
         }
         Insert: {
           brand_id: string
@@ -48,6 +52,7 @@ export type Database = {
           id?: string
           name: string
           photo_url?: string | null
+          user_id?: string | null
         }
         Update: {
           brand_id?: string
@@ -57,6 +62,7 @@ export type Database = {
           id?: string
           name?: string
           photo_url?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -76,6 +82,7 @@ export type Database = {
           observations: string | null
           operator_id: string
           scheduled_date: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -84,6 +91,7 @@ export type Database = {
           observations?: string | null
           operator_id: string
           scheduled_date: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -92,6 +100,7 @@ export type Database = {
           observations?: string | null
           operator_id?: string
           scheduled_date?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -120,6 +129,7 @@ export type Database = {
           last_name: string
           phone: string
           photo_url: string | null
+          user_id: string | null
         }
         Insert: {
           cedula: string
@@ -130,6 +140,7 @@ export type Database = {
           last_name: string
           phone: string
           photo_url?: string | null
+          user_id?: string | null
         }
         Update: {
           cedula?: string
@@ -140,6 +151,7 @@ export type Database = {
           last_name?: string
           phone?: string
           photo_url?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

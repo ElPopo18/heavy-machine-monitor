@@ -99,6 +99,7 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
         last_name: formData.lastName,
         phone: formData.phone,
         email: formData.email || null,
+        user_id: session.session.user.id,
         ...(photoUrl && { photo_url: photoUrl }),
       };
 
