@@ -32,18 +32,23 @@ export const useOperarioForm = (initialData?: FormData | null, operatorId?: stri
   }, [initialData]);
 
   const checkCedulaExists = async (cedula: string): Promise<boolean> => {
-    const { data, error } = await supabase
-      .from('operators')
-      .select('id')
-      .eq('cedula', cedula)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('operators')
+        .select('id')
+        .eq('cedula', cedula)
+        .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error checking cédula:', error);
+      if (error) {
+        console.error('Error checking cédula:', error);
+        return false;
+      }
+
+      return !!data;
+    } catch (error) {
+      console.error('Error in checkCedulaExists:', error);
       return false;
     }
-
-    return !!data;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
