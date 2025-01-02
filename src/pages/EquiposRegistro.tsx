@@ -117,6 +117,18 @@ const EquiposRegistro = () => {
     }
 
     try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Debe iniciar sesión para registrar equipos",
+        });
+        return;
+      }
+
       // Verificar si el código ya existe usando maybeSingle() en lugar de single()
       const { data: existingEquipment, error: checkError } = await supabase
         .from('equipment')
@@ -168,6 +180,7 @@ const EquiposRegistro = () => {
           code: formData.code,
           description: formData.description,
           photo_url: photoUrl,
+          user_id: user.id, // Add the user_id here
         });
 
       if (insertError) throw insertError;
