@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,10 +32,14 @@ const MaintenanceCalendar = () => {
 
       if (error) throw error;
 
-      // Filter out past events
-      const futureEvents = (data || []).filter((event) => 
-        isFutureOrToday(event.scheduled_date)
-      );
+      // Filter out past events and ensure correct date handling
+      const futureEvents = (data || [])
+        .filter((event) => isFutureOrToday(event.scheduled_date))
+        .map(event => ({
+          ...event,
+          // Ensure the date is parsed correctly without timezone offset
+          scheduled_date: event.scheduled_date.split('T')[0]
+        }));
 
       setMaintenanceEvents(futureEvents);
     } catch (error) {
@@ -83,7 +87,7 @@ const MaintenanceCalendar = () => {
 
   const getDayContent = (day: Date) => {
     const eventsForDay = maintenanceEvents.filter(
-      (event) => formatDate(event.scheduled_date) === format(day, "yyyy-MM-dd")
+      (event) => event.scheduled_date === format(day, "yyyy-MM-dd")
     );
 
     return (
@@ -100,7 +104,7 @@ const MaintenanceCalendar = () => {
     setSelectedDate(date);
     if (date) {
       const eventsForDay = maintenanceEvents.filter(
-        (event) => formatDate(event.scheduled_date) === format(date, "yyyy-MM-dd")
+        (event) => event.scheduled_date === format(date, "yyyy-MM-dd")
       );
       setSelectedEvents(eventsForDay);
     } else {
