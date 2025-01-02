@@ -3,16 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FormField } from "./FormField";
+import { isFutureOrToday, formatDate } from "./utils/dateUtils";
 
 interface Equipment {
   id: string;
@@ -76,6 +68,15 @@ const MaintenanceForm = () => {
       return;
     }
 
+    if (!isFutureOrToday(scheduledDate)) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "La fecha programada debe ser hoy o una fecha futura",
+      });
+      return;
+    }
+
     try {
       const {
         data: { user },
@@ -122,79 +123,55 @@ const MaintenanceForm = () => {
     }
   };
 
-  const today = new Date().toISOString().split("T")[0];
-
   if (loading) {
     return <div>Cargando...</div>;
   }
 
+  const today = formatDate(new Date().toISOString());
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="equipment">Equipo *</Label>
-        {equipment.length === 0 ? (
-          <p className="text-sm text-red-500">Registre un equipo primero</p>
-        ) : (
-          <Select value={selectedEquipment} onValueChange={setSelectedEquipment}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccione un equipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {equipment.map((eq) => (
-                <SelectItem key={eq.id} value={eq.id}>
-                  {eq.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+      <FormField
+        type="select"
+        label="Equipo"
+        required
+        value={selectedEquipment}
+        onChange={setSelectedEquipment}
+        options={equipment.map(eq => ({ id: eq.id, label: eq.name }))}
+        placeholder="Seleccione un equipo"
+        error={equipment.length === 0 ? "Registre un equipo primero" : undefined}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="operator">Operario *</Label>
-        {operators.length === 0 ? (
-          <p className="text-sm text-red-500">Registre un operario primero</p>
-        ) : (
-          <Select value={selectedOperator} onValueChange={setSelectedOperator}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccione un operario" />
-            </SelectTrigger>
-            <SelectContent>
-              {operators.map((op) => (
-                <SelectItem key={op.id} value={op.id}>
-                  {`${op.first_name} ${op.last_name}`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+      <FormField
+        type="select"
+        label="Operario"
+        required
+        value={selectedOperator}
+        onChange={setSelectedOperator}
+        options={operators.map(op => ({ 
+          id: op.id, 
+          label: `${op.first_name} ${op.last_name}` 
+        }))}
+        placeholder="Seleccione un operario"
+        error={operators.length === 0 ? "Registre un operario primero" : undefined}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="date">Fecha *</Label>
-        <Input
-          type="date"
-          id="date"
-          min={today}
-          value={scheduledDate}
-          onChange={(e) => setScheduledDate(e.target.value)}
-        />
-      </div>
+      <FormField
+        type="date"
+        label="Fecha"
+        required
+        value={scheduledDate}
+        onChange={(e) => setScheduledDate(e.target.value)}
+        min={today}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="observations">Observaciones</Label>
-        <Textarea
-          id="observations"
-          value={observations}
-          onChange={(e) => setObservations(e.target.value)}
-          maxLength={300}
-          placeholder="Detalles u observaciones (opcional)"
-          className="h-32"
-        />
-        <p className="text-sm text-muted-foreground">
-          {observations.length}/300 caracteres
-        </p>
-      </div>
+      <FormField
+        type="textarea"
+        label="Observaciones"
+        value={observations}
+        onChange={(e) => setObservations(e.target.value)}
+        maxLength={300}
+      />
 
       <Button type="submit" className="w-full">
         Registrar Mantenimiento
