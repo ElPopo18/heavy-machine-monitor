@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { FormField } from "./FormField";
-import { isFutureOrToday, formatDate } from "./utils/dateUtils";
+import { isFutureOrToday, formatDate, getTodayFormatted } from "./utils/dateUtils";
 
 interface Equipment {
   id: string;
@@ -134,7 +134,7 @@ const MaintenanceForm = () => {
     return <div>Cargando...</div>;
   }
 
-  const today = formatDate(new Date().toISOString());
+  const today = getTodayFormatted();
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

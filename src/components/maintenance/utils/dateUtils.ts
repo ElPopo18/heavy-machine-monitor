@@ -1,4 +1,4 @@
-import { format, parseISO, startOfDay, isValid } from "date-fns";
+import { format, parseISO, startOfDay, isValid, addDays } from "date-fns";
 
 export const isFutureOrToday = (date: string) => {
   const today = startOfDay(new Date());
@@ -18,6 +18,10 @@ export const formatDate = (date: string) => {
     }
   }
   
-  // Format to YYYY-MM-DD and ensure UTC
+  // Format to YYYY-MM-DD
   return format(parsedDate, "yyyy-MM-dd");
+};
+
+export const getTodayFormatted = () => {
+  return format(new Date(), "yyyy-MM-dd");
 };
