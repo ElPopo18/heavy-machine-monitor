@@ -59,29 +59,28 @@ const MaintenanceForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedEquipment || !selectedOperator || !scheduledDate) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Por favor complete todos los campos obligatorios",
-      });
-      return;
-    }
-
-    // Ensure the date is valid and in the future
-    if (!isFutureOrToday(scheduledDate)) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "La fecha programada debe ser hoy o una fecha futura",
-      });
-      return;
-    }
-
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // Validate required fields
+      if (!selectedEquipment || !selectedOperator || !scheduledDate) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Por favor complete todos los campos obligatorios",
+        });
+        return;
+      }
+
+      // Validate date
+      if (!isFutureOrToday(scheduledDate)) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "La fecha programada debe ser hoy o una fecha futura",
+        });
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
         toast({
@@ -92,7 +91,7 @@ const MaintenanceForm = () => {
         return;
       }
 
-      // Format the date to ensure it's in YYYY-MM-DD format
+      // Format the date ensuring UTC
       const formattedDate = formatDate(scheduledDate);
       console.log("Formatted date being sent:", formattedDate); // Debug log
 
@@ -105,7 +104,7 @@ const MaintenanceForm = () => {
       });
 
       if (error) {
-        console.error("Supabase error:", error); // Debug log
+        console.error("Supabase error:", error);
         throw error;
       }
 
