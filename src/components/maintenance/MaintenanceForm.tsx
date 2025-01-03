@@ -24,7 +24,7 @@ const MaintenanceForm = () => {
   const [operators, setOperators] = useState<Operator[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState("");
   const [selectedOperator, setSelectedOperator] = useState("");
-  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledDate, setScheduledDate] = useState(getTodayFormatted());
   const [observations, setObservations] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -91,9 +91,9 @@ const MaintenanceForm = () => {
         return;
       }
 
-      // Format the date
+      // Format the date to ensure it matches the expected format
       const formattedDate = formatDate(scheduledDate);
-      console.log("Formatted date:", formattedDate); // Debug log
+      console.log("Submitting maintenance with date:", formattedDate);
 
       const { error } = await supabase.from("maintenance").insert({
         equipment_id: selectedEquipment,
@@ -136,8 +136,6 @@ const MaintenanceForm = () => {
     return <div>Cargando...</div>;
   }
 
-  const today = getTodayFormatted();
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <FormField
@@ -171,7 +169,7 @@ const MaintenanceForm = () => {
         required
         value={scheduledDate}
         onChange={(e) => setScheduledDate(e.target.value)}
-        min={today}
+        min={getTodayFormatted()}
       />
 
       <FormField
