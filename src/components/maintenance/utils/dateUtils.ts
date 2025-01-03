@@ -18,10 +18,12 @@ export const formatDate = (date: string) => {
     }
   }
   
-  // Format to YYYY-MM-DD
+  // Format to YYYY-MM-DD and ensure UTC timezone
   return format(parsedDate, "yyyy-MM-dd");
 };
 
 export const getTodayFormatted = () => {
-  return format(new Date(), "yyyy-MM-dd");
+  // Get today's date in local timezone and format it
+  const today = startOfDay(new Date());
+  return format(today, "yyyy-MM-dd");
 };
