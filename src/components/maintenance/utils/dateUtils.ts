@@ -1,4 +1,4 @@
-import { format, parseISO, startOfDay, isValid } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 
 export const isFutureOrToday = (date: string) => {
   // Get current date in UTC
@@ -26,10 +26,7 @@ export const formatDate = (date: string) => {
     throw new Error("Invalid date");
   }
   
-  // Ensure UTC midnight
-  parsedDate.setUTCHours(0, 0, 0, 0);
-  
-  // Format to YYYY-MM-DD
+  // Format to YYYY-MM-DD without modifying the timezone
   const formatted = format(parsedDate, "yyyy-MM-dd");
   console.log('Formatted date:', {
     input: date,
@@ -40,10 +37,9 @@ export const formatDate = (date: string) => {
 };
 
 export const getTodayFormatted = () => {
-  // Get today's date in UTC
+  // Get today's date in local timezone
   const today = new Date();
-  // Set to UTC midnight
-  today.setUTCHours(0, 0, 0, 0);
+  // Format to YYYY-MM-DD
   const formatted = format(today, "yyyy-MM-dd");
   console.log('Today formatted:', formatted);
   return formatted;
