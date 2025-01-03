@@ -1,8 +1,8 @@
-import { format, startOfDay, isSameDay } from "date-fns";
+import { format, parseISO, startOfDay } from "date-fns";
 
 export const isFutureOrToday = (date: string) => {
   const today = startOfDay(new Date());
-  const eventDate = startOfDay(new Date(date));
+  const eventDate = startOfDay(parseISO(date));
   return eventDate >= today;
 };
 
