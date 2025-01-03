@@ -91,9 +91,9 @@ const MaintenanceForm = () => {
         return;
       }
 
-      // Format the date ensuring UTC
+      // Format the date
       const formattedDate = formatDate(scheduledDate);
-      console.log("Formatted date being sent:", formattedDate); // Debug log
+      console.log("Formatted date:", formattedDate); // Debug log
 
       const { error } = await supabase.from("maintenance").insert({
         equipment_id: selectedEquipment,
@@ -120,6 +120,8 @@ const MaintenanceForm = () => {
       
       if (error.code === "23505") {
         errorMessage = "El operario ya tiene una actividad programada para esta fecha";
+      } else if (error.code === "23514") {
+        errorMessage = "La fecha programada debe ser hoy o una fecha futura";
       }
 
       toast({
