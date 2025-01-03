@@ -58,7 +58,6 @@ const MaintenanceForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted with date:", scheduledDate);
 
     try {
       // Validate required fields
@@ -71,7 +70,7 @@ const MaintenanceForm = () => {
         return;
       }
 
-      // Validate date
+      // Validate date before formatting
       if (!isFutureOrToday(scheduledDate)) {
         toast({
           variant: "destructive",
@@ -94,7 +93,6 @@ const MaintenanceForm = () => {
 
       // Format the date to ensure it matches the expected format
       const formattedDate = formatDate(scheduledDate);
-      console.log("Submitting maintenance with formatted date:", formattedDate);
 
       const { error } = await supabase.from("maintenance").insert({
         equipment_id: selectedEquipment,
@@ -104,10 +102,7 @@ const MaintenanceForm = () => {
         user_id: user.id,
       });
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Mantenimiento registrado",
