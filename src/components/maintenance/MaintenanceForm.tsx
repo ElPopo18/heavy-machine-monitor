@@ -68,6 +68,7 @@ const MaintenanceForm = () => {
       return;
     }
 
+    // Ensure the date is valid and in the future
     if (!isFutureOrToday(scheduledDate)) {
       toast({
         variant: "destructive",
@@ -91,15 +92,22 @@ const MaintenanceForm = () => {
         return;
       }
 
+      // Format the date to ensure it's in YYYY-MM-DD format
+      const formattedDate = formatDate(scheduledDate);
+      console.log("Formatted date being sent:", formattedDate); // Debug log
+
       const { error } = await supabase.from("maintenance").insert({
         equipment_id: selectedEquipment,
         operator_id: selectedOperator,
-        scheduled_date: scheduledDate,
+        scheduled_date: formattedDate,
         observations: observations || null,
         user_id: user.id,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error); // Debug log
+        throw error;
+      }
 
       toast({
         title: "Mantenimiento registrado",

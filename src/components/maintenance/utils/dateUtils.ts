@@ -7,5 +7,11 @@ export const isFutureOrToday = (date: string) => {
 };
 
 export const formatDate = (date: string) => {
-  return format(new Date(date), "yyyy-MM-dd");
+  // Ensure we're working with a valid date string
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate.getTime())) {
+    throw new Error("Invalid date");
+  }
+  // Format to YYYY-MM-DD
+  return format(parsedDate, "yyyy-MM-dd");
 };
