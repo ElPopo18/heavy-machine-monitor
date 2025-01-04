@@ -2,16 +2,10 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { FormField } from "./FormField";
 import { useOperarioForm } from "./hooks/useOperarioForm";
+import { FormData } from "./types";
 
 interface OperarioFormProps {
-  initialData?: {
-    cedula: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    email: string;
-    photo: File | null;
-  } | null;
+  initialData?: FormData | null;
   operatorId?: string;
 }
 
