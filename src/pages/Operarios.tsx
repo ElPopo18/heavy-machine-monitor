@@ -47,6 +47,24 @@ const Operarios = () => {
 
   const handleDelete = async (id: string) => {
     try {
+      // First check if operator has maintenance records
+      const { data: maintenanceData, error: maintenanceError } = await supabase
+        .from('maintenance')
+        .select('id')
+        .eq('operator_id', id)
+        .maybeSingle();
+
+      if (maintenanceError) throw maintenanceError;
+
+      if (maintenanceData) {
+        toast({
+          variant: "destructive",
+          title: "No se puede eliminar",
+          description: "Este operario tiene registros de mantenimiento asociados. Elimine primero los mantenimientos.",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('operators')
         .delete()
