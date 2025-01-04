@@ -137,10 +137,10 @@ const MaintenanceForm = () => {
 
       // Send email notification
       const operator = operators.find(op => op.id === selectedOperator);
-      const equipment = equipment.find(eq => eq.id === selectedEquipment);
+      const selectedEquip = equipment.find(eq => eq.id === selectedEquipment);
       
-      if (operator && equipment) {
-        await sendMaintenanceEmail(operator, equipment.name);
+      if (operator && selectedEquip) {
+        await sendMaintenanceEmail(operator, selectedEquip.name);
       }
 
       toast({
