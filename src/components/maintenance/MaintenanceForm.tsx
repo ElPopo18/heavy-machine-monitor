@@ -15,6 +15,7 @@ interface Operator {
   id: string;
   first_name: string;
   last_name: string;
+  email: string;
 }
 
 const MaintenanceForm = () => {
@@ -33,7 +34,7 @@ const MaintenanceForm = () => {
       try {
         const [equipmentData, operatorsData] = await Promise.all([
           supabase.from("equipment").select("id, name"),
-          supabase.from("operators").select("id, first_name, last_name"),
+          supabase.from("operators").select("id, first_name, last_name, email"),
         ]);
 
         if (equipmentData.error) throw equipmentData.error;
@@ -55,6 +56,31 @@ const MaintenanceForm = () => {
 
     fetchData();
   }, [toast]);
+
+  const sendMaintenanceEmail = async (operator: Operator, equipmentName: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-maintenance-email', {
+        body: {
+          to: [operator.email],
+          operatorName: `${operator.first_name} ${operator.last_name}`,
+          equipmentName,
+          scheduledDate,
+          observations: observations || undefined,
+        },
+      });
+
+      if (error) throw error;
+
+      console.log('Email sent successfully:', data);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo enviar el correo de notificación",
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +133,14 @@ const MaintenanceForm = () => {
       if (error) {
         console.error("Supabase error:", error);
         throw error;
+      }
+
+      // Send email notification
+      const operator = operators.find(op => op.id === selectedOperator);
+      const equipment = equipment.find(eq => eq.id === selectedEquipment);
+      
+      if (operator && equipment) {
+        await sendMaintenanceEmail(operator, equipment.name);
       }
 
       toast({
