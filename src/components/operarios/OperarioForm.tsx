@@ -68,7 +68,8 @@ export const OperarioForm = ({ initialData, operatorId }: OperarioFormProps) => 
         type="email"
         value={formData.email}
         onChange={handleInputChange}
-        placeholder="(Opcional)"
+        error={errors.email}
+        required
       />
 
       <FormField
