@@ -60,7 +60,7 @@ export const OperarioForm = ({ initialData, operatorId }: OperarioFormProps) => 
         id="email"
         label="Email"
         type="email"
-        value={formData.email || ''}
+        value={formData.email}
         onChange={handleInputChange}
         error={errors.email}
         required
