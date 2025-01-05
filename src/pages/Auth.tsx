@@ -66,14 +66,14 @@ const Auth = () => {
                   colors: {
                     brand: 'rgb(var(--primary))',
                     brandAccent: 'rgb(var(--primary))',
-                    inputText: 'white',
-                    inputBackground: 'rgb(var(--background))',
+                    inputBackground: 'white',
+                    inputText: 'black',
                     inputBorder: 'rgb(var(--border))',
                   },
                 },
               },
               className: {
-                input: 'text-white',
+                input: 'bg-white text-black',
                 label: 'text-white',
               },
             }}
