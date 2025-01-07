@@ -2,6 +2,7 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import {
@@ -27,6 +28,26 @@ export const MaintenanceEventCard = ({ event, onDelete }: MaintenanceEventCardPr
 
   const handleEdit = (id: string) => {
     navigate(`/mantenimiento/editar/${id}`);
+  };
+
+  const handleDelete = async () => {
+    try {
+      // Enviar correo de notificación antes de eliminar
+      await supabase.functions.invoke('send-maintenance-notification', {
+        body: {
+          to: [event.operator.email],
+          operatorName: `${event.operator.first_name} ${event.operator.last_name}`,
+          equipmentName: event.equipment.name,
+          action: 'deleted'
+        },
+      });
+
+      await onDelete(event.id);
+    } catch (error) {
+      console.error('Error al enviar notificación de eliminación:', error);
+      // Continuar con la eliminación incluso si falla el envío del correo
+      await onDelete(event.id);
+    }
   };
 
   return (
@@ -73,7 +94,7 @@ export const MaintenanceEventCard = ({ event, onDelete }: MaintenanceEventCardPr
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={() => onDelete(event.id)}>
+              <AlertDialogAction onClick={handleDelete}>
                 Eliminar
               </AlertDialogAction>
             </AlertDialogFooter>

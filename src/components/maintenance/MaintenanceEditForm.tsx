@@ -23,6 +23,7 @@ interface Operator {
   id: string;
   first_name: string;
   last_name: string;
+  email: string;
 }
 
 interface MaintenanceEditFormProps {
@@ -41,6 +42,7 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
   const [loading, setLoading] = useState(true);
   const [originalOperatorId, setOriginalOperatorId] = useState("");
   const [originalDate, setOriginalDate] = useState("");
+  const [selectedEquipmentName, setSelectedEquipmentName] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,7 +59,7 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
         // Fetch equipment and operators
         const [equipmentData, operatorsData] = await Promise.all([
           supabase.from("equipment").select("id, name"),
-          supabase.from("operators").select("id, first_name, last_name"),
+          supabase.from("operators").select("id, first_name, last_name, email"),
         ]);
 
         if (equipmentData.error) throw equipmentData.error;
@@ -75,6 +77,14 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
           // Store original values for comparison
           setOriginalOperatorId(maintenanceData.operator_id);
           setOriginalDate(maintenanceData.scheduled_date);
+
+          // Find and store equipment name
+          const equipmentItem = equipmentData.data?.find(
+            (eq) => eq.id === maintenanceData.equipment_id
+          );
+          if (equipmentItem) {
+            setSelectedEquipmentName(equipmentItem.name);
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -103,41 +113,6 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
       return;
     }
 
-    // Only update if there are changes
-    if (
-      selectedOperator === originalOperatorId &&
-      scheduledDate === originalDate
-    ) {
-      // If only equipment or observations changed, proceed with update
-      try {
-        const { error } = await supabase
-          .from("maintenance")
-          .update({
-            equipment_id: selectedEquipment,
-            observations: observations || null,
-          })
-          .eq("id", maintenanceId);
-
-        if (error) throw error;
-
-        toast({
-          title: "Mantenimiento actualizado",
-          description: "El mantenimiento ha sido actualizado exitosamente",
-        });
-
-        navigate("/mantenimiento/calendario");
-      } catch (error: any) {
-        console.error("Error:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Error al actualizar el mantenimiento",
-        });
-      }
-      return;
-    }
-
-    // If operator or date changed, we need to check for conflicts
     try {
       const { error } = await supabase
         .from("maintenance")
@@ -160,6 +135,21 @@ const MaintenanceEditForm = ({ maintenanceId }: MaintenanceEditFormProps) => {
           return;
         }
         throw error;
+      }
+
+      // Enviar correo de notificación
+      const selectedOperatorData = operators.find(op => op.id === selectedOperator);
+      if (selectedOperatorData) {
+        await supabase.functions.invoke('send-maintenance-notification', {
+          body: {
+            to: [selectedOperatorData.email],
+            operatorName: `${selectedOperatorData.first_name} ${selectedOperatorData.last_name}`,
+            equipmentName: selectedEquipmentName,
+            action: 'edited',
+            scheduledDate,
+            observations: observations || undefined,
+          },
+        });
       }
 
       toast({

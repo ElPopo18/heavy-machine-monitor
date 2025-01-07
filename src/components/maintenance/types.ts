@@ -7,6 +7,7 @@ export interface MaintenanceEvent {
   operator: {
     first_name: string;
     last_name: string;
+    email: string;
   };
   observations: string | null;
 }
