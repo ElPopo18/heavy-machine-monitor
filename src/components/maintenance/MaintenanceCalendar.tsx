@@ -27,7 +27,7 @@ const MaintenanceCalendar = () => {
           scheduled_date,
           observations,
           equipment:equipment_id(name),
-          operator:operator_id(first_name, last_name)
+          operator:operator_id(first_name, last_name, email)
         `);
 
       if (error) throw error;
